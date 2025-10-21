@@ -1,42 +1,34 @@
 #include "BitcoinExchange.hpp"
 
-BitcoinExchange::BitcoinExchange(void) { }
+BitcoinExchange::BitcoinExchange(void) { 
+	//std::cout << "BitcoinExchange class default constructor called" << std::endl;
+}
+
+BitcoinExchange::BitcoinExchange(const BitcoinExchange &other) : data_base(other.data_base) {
+	//std::cout << "BitcoinExchange class copy constructor called" << std::endl;
+}
+
+BitcoinExchange&	BitcoinExchange::operator=(const BitcoinExchange &other) {
+	//std::cout << "BitcoinExchange class assign operator called" << std::endl;
+	if (this != &other)
+		this->data_base = other.data_base;
+	return (*this);
+}
 
 BitcoinExchange::~BitcoinExchange(void) {
-
+	//std::cout << "BitcoinExchange class destructor called" << std::endl;
 };
-
-/*void	BitcoinExchange::exchange(const std::string &input_file) {
-	std::ifstream inFile(input_file);
-	if (!inFile.is_open()) {
-    	std::cerr << "Failed to create file\n";
-	} 
-	std::string line;
-	while (std::getline(inFile, line)) {
-
-
-
-
-    	std::cout << line;   
-	}
-    inFile.close();
-	return;
-}*/
-
-
-
-
-
 
 
 bool	BitcoinExchange::build_data_base(std::string const &data_base_name) {
-	// this is optional and can be omitted
+	
 	std::map<std::string, float> data;
     std::string line;
 
 	if (!csv_extension(data_base_name))
 		return false;
 
+	// this is optional and can be omitted
 	std::ifstream data_file(data_base_name);
 	if (!data_file.is_open()) {
     	std::cerr << "Failed to create file\n";
@@ -65,8 +57,8 @@ bool	BitcoinExchange::build_data_base(std::string const &data_base_name) {
         }
 
         data[date] = atof(valueStr.c_str());
-		for (std::map<std::string,float>::iterator it = data.begin(); it != data.end(); ++it)
-        std::cout << it->first << " => " << it->second << "\n";
+		//for (std::map<std::string,float>::iterator it = data.begin(); it != data.end(); ++it)
+        //	std::cout << it->first << " => " << it->second << "\n";
     }
 	this->data_base = data;
     // test print
@@ -77,7 +69,61 @@ bool	BitcoinExchange::build_data_base(std::string const &data_base_name) {
 	return true;
 }
 
-// ------------------------------------ Non-class functions ------------------------------------
+void	BitcoinExchange::exchange(const std::string &input_file) {
+	std::ifstream input_data(input_file);
+	if (!input_data.is_open()) {
+    	std::cerr << "Failed to create file\n";
+	}
+
+	if (data_base.size() == 0)
+		throw("Error");
+	
+	std::string line;	
+	// to skip first line as it is header
+	if (!std::getline(input_data, line))
+        throw ("Error: empty file");
+	
+	while (std::getline(input_data, line)) {
+		std::stringstream ss(line);
+		std::string date, valueStr;
+
+		// mirar si encaja
+		if (!std::getline(ss, date, '|') || !std::getline(ss, valueStr)) {
+            std::cerr << "Bad input => " << line << "\n";
+            continue;
+        }
+
+		if (!date.empty() && date.back() == ' ')
+    		date = date.substr(0, date.size() - 1);
+		if (!valueStr.empty() && valueStr.front() == ' ')
+    		valueStr = valueStr.substr(1, valueStr.size());
+        if (!valid_date_format(date)) {
+			std::cerr << "Invalid data: |" << date << "|" << "\n";
+			continue;
+		}
+		if (!valid_value(valueStr, 0)) 
+		{
+            std::cerr << "Invalid value string: |" << valueStr << "|" << "\n";
+            continue;
+        }
+		if (!this->data_base[date])
+		{
+			std::map<std::string, float>::iterator it = data_base.lower_bound(date);
+			if (it == data_base.begin()){
+				std::cerr << "Invalid data: " << date << "" << "\n";
+				continue;
+			}
+			date = (--it)->first;
+		}
+		std::cout << date << " => " << this->data_base[date]* atof(valueStr.c_str()) << std::endl;
+	}
+
+    input_data.close();
+	return;
+}
+
+
+// --------------------------------------- Non-class functions --------------------------------------
 
 bool csv_extension(const std::string &filename) {
 	if (filename.size() < 5)
@@ -145,7 +191,7 @@ bool	valid_value(std::string &value, int flag) {
 		return false;
 
 	double num = atof(value.c_str());
-	if (num > 1000 && flag == 0)
+	if (num > 1000 && flag == 0) 
 		return false;
 	return true;
 }

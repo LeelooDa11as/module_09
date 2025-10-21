@@ -18,8 +18,8 @@ class BitcoinExchange
 		BitcoinExchange&	operator=(const BitcoinExchange &other);
 		~BitcoinExchange(void);
 
-		void	exchange(const std::string &input_file);
 		bool	build_data_base(std::string const &data_base);
+		void	exchange(const std::string &input_file);
 };
 
 bool	csv_extension(const std::string &filename);
