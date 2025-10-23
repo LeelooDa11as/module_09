@@ -28,3 +28,25 @@ class PmergeMe
 
 		void	sort();
 };
+
+int		get_index(int num, const std::vector<int> &big_nums);
+int		get_index_deque(int num, const std::deque<int> &big_nums);
+
+template <typename Container>
+void 	jacobsthal_order(Container &cont){
+	int i = 1;
+	int j = 0;
+	for (size_t jacob_sum = 0; jacob_sum < cont.size(); ++i){
+		int jn = 2 * i + j;
+		// if the jacobsthal number is too big, we reverse what we can
+		if (jn + jacob_sum > cont.size())
+			jn = cont.size() - jacob_sum;
+		// it starts from the sum of all previous jacobstal numbers up to the end of current one
+		std::reverse(cont.begin() + jacob_sum, cont.begin() + jacob_sum + jn);
+		jacob_sum += jn;
+		//actualisation of jacobsthal previous numbers
+		std::swap(i, j);
+		std::swap(j, jn);
+	}
+
+}
