@@ -26,18 +26,21 @@ bool	BitcoinExchange::build_data_base(std::string const &data_base_name) {
     std::string line;
 
 	if (!csv_extension(data_base_name))
+	{
+		std::cerr << "Error: wrong extension." << std::endl;
 		return false;
+	}
 
 	// this is optional and can be omitted
 	std::ifstream data_file(data_base_name);
 	if (!data_file.is_open()) {
-    	std::cerr << "Failed to create file\n";
+    	std::cerr << "Error: Failed to open file." << std::endl;
 		return false;
 	}
 
 	// to skip first line as it is header
 	if (!std::getline(data_file, line)) {
-        std::cerr << "Error: empty file\n";
+        std::cerr << "Error: empty database file." << std::endl;
         return false;
     }
 
@@ -71,10 +74,8 @@ bool	BitcoinExchange::build_data_base(std::string const &data_base_name) {
 
 void	BitcoinExchange::exchange(const std::string &input_file) {
 	std::ifstream input_data(input_file);
-	if (!input_data.is_open()) {
-    	std::cerr << "Failed to create file\n";
-	}
-
+	if (!input_data.is_open())
+    	throw ("Error: could not open file.");
 	if (data_base.size() == 0)
 		throw("Error");
 	
@@ -154,7 +155,7 @@ bool	valid_date_format(std::string &date) {
 		return false;
 	
 	//day
-	if (!isdigit(date[8]) || date[8] > '3' || !isdigit(date[9]) || date[5] > '2')
+	if (!isdigit(date[8]) || date[8] > '3' || !isdigit(date[9]))
 		return false;
     int day = (date[8] - '0') * 10 + (date[9] - '0');
     if (day < 1 || day > 31)

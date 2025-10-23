@@ -2,21 +2,23 @@
 
 
 int	main(int ac, char **av){
-    if (ac == 2) {
-		std::string	data_file = "data.csv";
-		std::string	input_file = av[1];
-		BitcoinExchange	test;
-		if (test.build_data_base(data_file) == false)
-			return 1;
-		try {
-			test.exchange(input_file);
-		}
-		catch (const char *e) {
-			std::cerr << e << std::endl;
-		}
+	if (ac != 2)
+	{
+		std::cerr << "Error: could not open file." << std::endl;
+		return 1;
 	}
-	else
-		std::cerr << "Error" << std::endl;
-
+    
+	std::string	data_file = "data.csv";
+	std::string	input_file = av[1];
+	BitcoinExchange	test;
+	if (test.build_data_base(data_file) == false)
+		return 1;
+	try {
+		test.exchange(input_file);
+	}
+	catch (const char *e) {
+		std::cerr << e << std::endl;
+	}
+	
     return 0;
 }
